@@ -39,7 +39,14 @@ env:
 secrets:
   huggingface:
     name: hf-secret
+    # SECURITY: Never commit your actual token to git!
+    # Use --set secrets.huggingface.token="your-token" during helm install/upgrade
+    # Or create a values-local.yaml file (git-ignored) with your token
     token: "<YOUR_HUGGINGFACE_TOKEN>"
+    # Alternative: reference an existing secret instead of creating one
+    existingSecret:
+      name: ""
+      key: ""
 
 # Storage configuration
 storage:

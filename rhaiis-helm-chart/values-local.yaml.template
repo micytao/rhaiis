@@ -1,0 +1,19 @@
+# Template for local development values
+# Copy this file to values-local.yaml and update with your actual secrets
+# values-local.yaml is git-ignored for security
+
+# Secrets configuration - UPDATE WITH YOUR ACTUAL TOKEN
+secrets:
+  huggingface:
+    name: hf-secret
+    token: "hf_your_actual_token_here"
+
+# You can override any other values here for local development
+# For example:
+# image:
+#   tag: "latest"
+# 
+# resources:
+#   limits:
+#     cpu: "8"
+#     memory: 16Gi

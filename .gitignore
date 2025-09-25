@@ -22,3 +22,8 @@ build/
 # Kubernetes secrets (if using local files)
 *-secret.yaml
 *_secret.yaml
+
+# Helm values with secrets
+values-local.yaml
+values-*.local.yaml
+*-values-local.yaml

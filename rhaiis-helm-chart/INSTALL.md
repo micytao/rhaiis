@@ -1,5 +1,14 @@
 # Quick Installation Guide
 
+## Security Notice
+
+⚠️ **IMPORTANT**: Never commit your actual Hugging Face token to git!
+
+This guide shows secure methods for handling your HF token:
+- Command line injection (testing)
+- Local values file (development) 
+- External secrets (production)
+
 ## Prerequisites
 
 1. **Create namespace:**
@@ -18,19 +27,48 @@
 
 ## Installation
 
-### Option 1: Basic Installation
+### Option 1: Command Line Token (Testing Only)
 ```bash
+# NEVER commit your actual token to git!
 helm install rhaiis ./rhaiis-helm-chart \
   --namespace rhaiis \
   --set secrets.huggingface.token="your-hf-token-here"
 ```
 
-### Option 2: Custom Values File
-Create `my-values.yaml`:
+### Option 2: Local Values File (Recommended for Development)
+
+```bash
+# Copy template and add your token (git-ignored)
+cp rhaiis-helm-chart/values-local.yaml.template rhaiis-helm-chart/values-local.yaml
+# Edit values-local.yaml with your actual token
+
+# Install with local values
+helm install rhaiis ./rhaiis-helm-chart \
+  --namespace rhaiis \
+  --values ./rhaiis-helm-chart/values-local.yaml
+```
+
+### Option 3: External Secret (Recommended for Production)
+
+```bash
+# Create secret manually
+kubectl create secret generic my-hf-secret \
+  --from-literal=HF_TOKEN="your-hf-token-here" \
+  --namespace rhaiis
+
+# Install referencing existing secret
+helm install rhaiis ./rhaiis-helm-chart \
+  --namespace rhaiis \
+  --set secrets.huggingface.existingSecret.name="my-hf-secret" \
+  --set secrets.huggingface.existingSecret.key="HF_TOKEN"
+```
+
+### Option 4: Custom Values File
+Create `my-values.yaml` (remember to add to .gitignore if it contains secrets):
 ```yaml
 secrets:
   huggingface:
-    token: "your-hf-token-here"
+    token: "your-hf-token-here"  # Only for non-committed files!
 
 app:
   model: "microsoft/DialoGPT-large"

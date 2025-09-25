@@ -14,6 +14,15 @@ This Helm chart deploys RHAIIS, which provides an OpenAI-compatible API server p
 - Access to Red Hat container registry (`registry.redhat.io`)
 - Hugging Face token for model access
 
+## Security Notice
+
+⚠️ **IMPORTANT**: Never commit your actual Hugging Face token to git! This chart provides several secure ways to handle tokens:
+
+1. **Command line** (recommended for testing): Use `--set secrets.huggingface.token="your-token"`
+2. **Local values file** (recommended for development): Create `values-local.yaml` (git-ignored)
+3. **External secret** (recommended for production): Reference an existing Kubernetes secret
+4. **CI/CD pipeline**: Inject tokens during deployment
+
 ## Installation
 
 ### Add Required Secrets
@@ -34,10 +43,40 @@ kubectl create secret docker-registry docker-secret \
 # Create namespace
 kubectl create namespace rhaiis
 
-# Install the chart
+# Install the chart with token via command line
 helm install rhaiis ./rhaiis-helm-chart \
   --namespace rhaiis \
   --set secrets.huggingface.token="your-hf-token-here"
+```
+
+### Secure Installation Methods
+
+#### Method 1: Local Values File (Recommended for Development)
+
+```bash
+# Copy the template and add your token
+cp rhaiis-helm-chart/values-local.yaml.template rhaiis-helm-chart/values-local.yaml
+# Edit values-local.yaml and add your actual token
+
+# Install using the local values file
+helm install rhaiis ./rhaiis-helm-chart \
+  --namespace rhaiis \
+  --values ./rhaiis-helm-chart/values-local.yaml
+```
+
+#### Method 2: External Secret (Recommended for Production)
+
+```bash
+# Create secret manually
+kubectl create secret generic my-hf-secret \
+  --from-literal=HF_TOKEN="your-hf-token-here" \
+  --namespace rhaiis
+
+# Install referencing existing secret
+helm install rhaiis ./rhaiis-helm-chart \
+  --namespace rhaiis \
+  --set secrets.huggingface.existingSecret.name="my-hf-secret" \
+  --set secrets.huggingface.existingSecret.key="HF_TOKEN"
 ```
 
 ### Install with Custom Values
@@ -61,7 +100,9 @@ The following table lists the configurable parameters and their default values:
 | `replicaCount` | Number of replicas | `1` |
 | `app.model` | Model to serve | `RedHatAI/Llama-3.2-1B-Instruct-FP8` |
 | `app.port` | Application port | `8000` |
-| `secrets.huggingface.token` | Hugging Face API token | `""` |
+| `secrets.huggingface.token` | Hugging Face API token (use placeholder in git) | `"<YOUR_HUGGINGFACE_TOKEN>"` |
+| `secrets.huggingface.existingSecret.name` | Name of existing secret containing HF token | `""` |
+| `secrets.huggingface.existingSecret.key` | Key in existing secret containing HF token | `""` |
 | `storage.cache.size` | Cache storage size | `50Gi` |
 | `storage.modelCache.size` | Model cache storage size | `20Gi` |
 | `resources.limits.cpu` | CPU limit | `16` |

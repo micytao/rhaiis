@@ -43,8 +43,13 @@ spec:
             - name: HUGGING_FACE_HUB_TOKEN
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.secrets.huggingface.existingSecret.name }}
+                  name: {{ .Values.secrets.huggingface.existingSecret.name }}
+                  key: {{ .Values.secrets.huggingface.existingSecret.key | default "HF_TOKEN" }}
+                  {{- else }}
                   name: {{ include "rhaiis.secretName" . }}
                   key: HF_TOKEN
+                  {{- end }}
             - name: HF_HUB_OFFLINE
               value: {{ .Values.env.hfHubOffline | quote }}
             - name: VLLM_NO_USAGE_STATS
