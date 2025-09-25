@@ -1,8 +1,18 @@
 # Install RHAIIS (Red Hat AI Inference Server) on OCP/K8s
 
+> **⚠️ DISCLAIMER: Community Project**
+> 
+> This is **NOT an official Red Hat product or project**. This is a community-driven project intended **for experimentation and learning purposes only** with Red Hat AI Inference Server (RHAIIS).
+> 
+> **For official setup, implementation, and production deployments**, please refer to the official Red Hat documentation:
+> 📖 [Red Hat AI Inference Server Official Documentation](https://docs.redhat.com/en/documentation/red_hat_ai_inference_server/3.2/html/deploying_red_hat_ai_inference_server_in_openshift_container_platform/index)
+> 
+> **Use this project at your own risk** and ensure compliance with your organization's policies and Red Hat's licensing terms.
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![OpenShift](https://img.shields.io/badge/OpenShift-4.x-red.svg)](https://www.redhat.com/en/technologies/cloud-computing/openshift)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.19+-blue.svg)](https://kubernetes.io/)
+[![Community](https://img.shields.io/badge/Community-Experimental-orange.svg)](https://github.com/micytao/rhaiis)
 
 A comprehensive deployment solution for Red Hat AI Inference Server (RHAIIS) that provides an OpenAI-compatible API server powered by vLLM for serving large language models with GPU acceleration.
 
@@ -363,6 +373,10 @@ helm install rhaiis-dev ./rhaiis-helm-chart \
 
 ## 📚 Documentation
 
+### Official Red Hat Documentation
+- **[Red Hat AI Inference Server Official Documentation](https://docs.redhat.com/en/documentation/red_hat_ai_inference_server/3.2/html/deploying_red_hat_ai_inference_server_in_openshift_container_platform/index)** - Official Red Hat deployment guide
+
+### Community Project Documentation
 - **[Helm Chart Documentation](./rhaiis-helm-chart/README.md)** - Detailed Helm configuration
 - **[Kustomize Documentation](./kustomize/README.md)** - Kustomize deployment guide
 - **[Installation Guide](./rhaiis-helm-chart/INSTALL.md)** - Quick installation steps
