@@ -1,0 +1,130 @@
+# Default values for rhaiis.
+# This is a YAML-formatted file.
+# Declare variables to be substituted into your templates.
+
+# Global settings
+global:
+  namespace: rhaiis
+
+# Image configuration
+image:
+  repository: registry.redhat.io/rhaiis/vllm-cuda-rhel9
+  tag: "3.2.1"
+  pullPolicy: IfNotPresent
+
+# Image pull secrets
+imagePullSecrets:
+  - name: docker-secret
+
+# Deployment configuration
+replicaCount: 1
+
+# Service Account
+serviceAccount:
+  name: default
+
+# Application configuration
+app:
+  name: rhaiis
+  port: 8000
+  model: "RedHatAI/Llama-3.2-1B-Instruct-FP8"
+  tensorParallelSize: 1
+
+# Environment variables
+env:
+  hfHubOffline: "0"
+  vllmNoUsageStats: "1"
+
+# Secrets configuration
+secrets:
+  huggingface:
+    name: hf-secret
+    token: "<YOUR_HUGGINGFACE_TOKEN>"
+
+# Storage configuration
+storage:
+  cache:
+    name: rhaiis-cache
+    size: 50Gi
+    storageClassName: gp3-csi
+    accessModes:
+      - ReadWriteOnce
+  modelCache:
+    name: model-cache
+    size: 20Gi
+    storageClassName: gp3-csi
+    accessModes:
+      - ReadWriteOnce
+  sharedMemory:
+    sizeLimit: 4Gi
+
+# Resource configuration
+resources:
+  limits:
+    cpu: "16"
+    memory: 32Gi
+    "nvidia.com/gpu": "1"
+  requests:
+    cpu: "4"
+    memory: 8Gi
+    "nvidia.com/gpu": "1"
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
+  capabilities:
+    drop:
+      - ALL
+
+# Health checks
+healthChecks:
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 10
+
+# Service configuration
+service:
+  name: rhaiis-service
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+  protocol: TCP
+
+# Route configuration (OpenShift)
+route:
+  enabled: true
+  name: rhaiis-route
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+
+# Labels to apply to all resources
+labels:
+  app: rhaiis
+
+# Pod annotations
+podAnnotations: {}
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}

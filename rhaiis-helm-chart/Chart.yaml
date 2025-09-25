@@ -1,0 +1,18 @@
+apiVersion: v2
+name: rhaiis
+description: A Helm chart for Red Hat AI Infrastructure Services (RHAIIS) deployment
+type: application
+version: 0.1.0
+appVersion: "3.2.1"
+keywords:
+  - ai
+  - llm
+  - vllm
+  - rhaiis
+  - redhat
+home: https://github.com/your-org/rhaiis-helm-chart
+sources:
+  - https://github.com/your-org/rhaiis-helm-chart
+maintainers:
+  - name: Your Name
+    email: your.email@example.com

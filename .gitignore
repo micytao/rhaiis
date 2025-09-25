@@ -1,0 +1,24 @@
+# Sensitive files
+*.env
+.env*
+hf_token.txt
+secrets/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.log
+
+# Kubernetes secrets (if using local files)
+*-secret.yaml
+*_secret.yaml

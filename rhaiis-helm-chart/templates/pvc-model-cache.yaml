@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "rhaiis.modelCachePvcName" . }}
+  namespace: {{ include "rhaiis.namespace" . }}
+  labels:
+    {{- include "rhaiis.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- range .Values.storage.modelCache.accessModes }}
+    - {{ . }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.modelCache.size }}
+  {{- if .Values.storage.modelCache.storageClassName }}
+  storageClassName: {{ .Values.storage.modelCache.storageClassName }}
+  {{- end }}

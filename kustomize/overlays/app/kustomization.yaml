@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: rhaiis-app
+
+# Base RHAIIS application
+resources:
+- ../../base
+
+# Application-specific configuration
+namespace: rhaiis
+
+# Add any app-specific patches or configurations here
+# patchesStrategicMerge:
+#   - deployment-patch.yaml
+
+labels:
+- includeSelectors: true
+  pairs:
+    app.kubernetes.io/component: ai-inference
+    app.kubernetes.io/name: rhaiis
+    app.kubernetes.io/version: 3.2.1

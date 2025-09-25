@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: rhaiis-base
+
+resources:
+- namespace.yaml
+- pvc-cache.yaml
+- pvc-model-cache.yaml
+- secret.yaml
+- deployment.yaml
+- service.yaml
+- route.yaml
+
+labels:
+- includeSelectors: true
+  pairs:
+    app.kubernetes.io/component: ai-inference
+    app.kubernetes.io/name: rhaiis

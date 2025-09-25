@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rhaiis.fullname" . }}
+  namespace: {{ include "rhaiis.namespace" . }}
+  labels:
+    {{- include "rhaiis.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "rhaiis.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "rhaiis.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "rhaiis.serviceAccountName" . }}
+      volumes:
+        - name: cache-volume
+          persistentVolumeClaim:
+            claimName: {{ include "rhaiis.cachePvcName" . }}
+        - name: model-cache-volume
+          persistentVolumeClaim:
+            claimName: {{ include "rhaiis.modelCachePvcName" . }}
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ .Values.storage.sharedMemory.sizeLimit }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: HUGGING_FACE_HUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "rhaiis.secretName" . }}
+                  key: HF_TOKEN
+            - name: HF_HUB_OFFLINE
+              value: {{ .Values.env.hfHubOffline | quote }}
+            - name: VLLM_NO_USAGE_STATS
+              value: {{ .Values.env.vllmNoUsageStats | quote }}
+          command:
+            - python
+            - "-m"
+            - vllm.entrypoints.openai.api_server
+          args:
+            - "--port={{ .Values.app.port }}"
+            - "--model={{ .Values.app.model }}"
+            - "--tensor-parallel-size={{ .Values.app.tensorParallelSize }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.app.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: cache-volume
+              mountPath: /opt/app-root/src/.cache
+            - name: model-cache-volume
+              mountPath: /opt/app-root/src/.cache/models
+            - name: shm
+              mountPath: /dev/shm
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.healthChecks.readinessProbe | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.healthChecks.livenessProbe | nindent 12 }}
+      restartPolicy: Always
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

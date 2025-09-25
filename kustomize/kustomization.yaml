@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: rhaiis-complete
+
+# Deploy operators first (prerequisite), then the application
+# WARNING: This may fail if operators aren't ready yet
+# Use step-by-step deployment instead (see README.md)
+resources:
+  - overlays/operators/install
+  - overlays/operators/instances  
+  - overlays/app
+
+labels:
+- includeSelectors: true
+  pairs:
+    app.kubernetes.io/name: rhaiis
+    app.kubernetes.io/managed-by: kustomize

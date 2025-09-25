@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: rhaiis-operators-instances
+
+# Create operator instances - requires operators to be installed first
+resources:
+  # NodeFeatureDiscovery instance (requires NFD operator)
+  - nfd-instance.yaml
+  
+  # ClusterPolicy instance (requires GPU operator)
+  - gpu-clusterpolicy.yaml
+
+labels:
+- includeSelectors: true
+  pairs:
+    app.kubernetes.io/name: rhaiis
+    app.kubernetes.io/component: operators-instances

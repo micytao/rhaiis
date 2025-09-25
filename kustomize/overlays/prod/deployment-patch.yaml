@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rhaiis
+  namespace: rhaiis
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: rhaiis
+          resources:
+            limits:
+              cpu: '16'
+              nvidia.com/gpu: '1'
+              memory: 32Gi
+            requests:
+              cpu: '4'
+              memory: 8Gi
+              nvidia.com/gpu: '1'
+          env:
+            - name: HF_HUB_OFFLINE
+              value: '0'
+            - name: VLLM_NO_USAGE_STATS
+              value: '1'
