@@ -1,10 +1,10 @@
-# RHAIIS - Red Hat AI Infrastructure Services
+# Install RHAIIS (Red Hat AI Inference Server) on OCP/K8s
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![OpenShift](https://img.shields.io/badge/OpenShift-4.x-red.svg)](https://www.redhat.com/en/technologies/cloud-computing/openshift)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.19+-blue.svg)](https://kubernetes.io/)
 
-A comprehensive deployment solution for Red Hat AI Infrastructure Services (RHAIIS) that provides an OpenAI-compatible API server powered by vLLM for serving large language models with GPU acceleration.
+A comprehensive deployment solution for Red Hat AI Inference Server (RHAIIS) that provides an OpenAI-compatible API server powered by vLLM for serving large language models with GPU acceleration.
 
 ## 🚀 Features
 
@@ -65,7 +65,28 @@ A comprehensive deployment solution for Red Hat AI Infrastructure Services (RHAI
 
 ## 🚀 Quick Start
 
-### Option 1: Helm Deployment (Recommended)
+### Option 1: Kustomize Deployment (Recommended)
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/micytao/rhaiis.git
+cd rhaiis
+
+# 2. Deploy operators first
+kubectl apply -k kustomize/overlays/operators/install/
+
+# 3. Wait for operators to be ready
+kubectl wait --for=condition=Succeeded csv -n openshift-nfd --all --timeout=300s
+kubectl wait --for=condition=Succeeded csv -n nvidia-gpu-operator --all --timeout=300s
+
+# 4. Create operator instances
+kubectl apply -k kustomize/overlays/operators/instances/
+
+# 5. Deploy application
+kubectl apply -k kustomize/overlays/app/
+```
+
+### Option 2: Helm Deployment
 
 ```bash
 # 1. Clone the repository
@@ -86,27 +107,6 @@ helm install rhaiis ./rhaiis-helm-chart \
   --set secrets.huggingface.token="your-hf-token-here"
 ```
 
-### Option 2: Kustomize Deployment
-
-```bash
-# 1. Clone and setup
-git clone https://github.com/micytao/rhaiis.git
-cd rhaiis
-
-# 2. Deploy operators first
-kubectl apply -k kustomize/overlays/operators/install/
-
-# 3. Wait for operators to be ready
-kubectl wait --for=condition=Succeeded csv -n openshift-nfd --all --timeout=300s
-kubectl wait --for=condition=Succeeded csv -n nvidia-gpu-operator --all --timeout=300s
-
-# 4. Create operator instances
-kubectl apply -k kustomize/overlays/operators/instances/
-
-# 5. Deploy application
-kubectl apply -k kustomize/overlays/app/
-```
-
 ## 📁 Project Structure
 
 ```
@@ -115,7 +115,16 @@ rhaiis/
 ├── SETUP.md                     # Detailed setup instructions
 ├── .gitignore                   # Git ignore rules (includes security exclusions)
 │
-├── rhaiis-helm-chart/          # 🎯 Helm Chart (Recommended)
+├── kustomize/                  # 🎯 Kustomize Deployment (Recommended)
+│   ├── README.md               # Kustomize-specific documentation
+│   ├── base/                   # Base Kubernetes resources
+│   └── overlays/               # Environment-specific configurations
+│       ├── operators/          # GPU and NFD operator setup
+│       ├── dev/                # Development environment
+│       ├── prod/               # Production environment
+│       └── app/                # Application overlay
+│
+├── rhaiis-helm-chart/          # 🔧 Helm Chart
 │   ├── Chart.yaml              # Chart metadata
 │   ├── README.md               # Helm-specific documentation
 │   ├── INSTALL.md              # Quick installation guide
@@ -128,15 +137,6 @@ rhaiis/
 │       ├── secret.yaml         # Secret management
 │       └── pvc-*.yaml          # Persistent volume claims
 │
-├── kustomize/                  # 🔧 Kustomize Deployment
-│   ├── README.md               # Kustomize-specific documentation
-│   ├── base/                   # Base Kubernetes resources
-│   └── overlays/               # Environment-specific configurations
-│       ├── operators/          # GPU and NFD operator setup
-│       ├── dev/                # Development environment
-│       ├── prod/               # Production environment
-│       └── app/                # Application overlay
-│
 └── *.yml                       # 📄 Standalone manifests (legacy)
 ```
 
@@ -144,13 +144,14 @@ rhaiis/
 
 ### Deployment Methods Comparison
 
-| Feature | Helm Chart | Kustomize | Standalone |
-|---------|------------|-----------|------------|
-| **Ease of Use** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| **Customization** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ |
-| **Environment Management** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐ |
-| **Operator Integration** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐ |
-| **Production Ready** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
+| Feature | Kustomize | Helm Chart | Standalone |
+|---------|-----------|------------|------------|
+| **Ease of Use** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ |
+| **Customization** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
+| **Environment Management** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐ |
+| **Operator Integration** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐ |
+| **Production Ready** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ |
+| **GitOps Friendly** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
 
 ### Key Configuration Parameters
 
@@ -209,7 +210,21 @@ This project implements multiple secure token handling methods:
 
 ## 🌍 Environment-Specific Deployments
 
-### Development Environment
+### Development Environment (Kustomize - Recommended)
+```bash
+# Lower resource requirements, single replica
+kubectl apply -k kustomize/overlays/dev/
+```
+
+### Production Environment (Kustomize - Recommended)
+```bash
+# High availability, multiple replicas, production settings
+kubectl apply -k kustomize/overlays/prod/
+```
+
+### Alternative: Helm Deployments
+
+#### Development Environment
 ```bash
 # Lower resource requirements, single replica
 helm install rhaiis-dev ./rhaiis-helm-chart \
@@ -220,7 +235,7 @@ helm install rhaiis-dev ./rhaiis-helm-chart \
   --set resources.limits.memory="8Gi"
 ```
 
-### Production Environment
+#### Production Environment
 ```bash
 # High availability, multiple replicas
 helm install rhaiis-prod ./rhaiis-helm-chart \
